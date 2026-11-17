@@ -1,2 +1,3 @@
 # Chat App
-[Link]("https://react-chat-app-blond.vercel.app/")
+
+Live URL: https://react-chat-app-blond.vercel.app/
