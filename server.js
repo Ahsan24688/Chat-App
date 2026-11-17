@@ -10,7 +10,7 @@ import {Server} from "socket.io";
 dotenv.config();
 
 const app = express();
-const port = 3000;
+// const port = 3000;
 
 const server = http.createServer(app);
 
@@ -62,6 +62,12 @@ mongoose.connect(process.env.MONGODB).then(() => {
     console.log(error.message);
 })
 
-server.listen(port, () => {
-    console.log(`Server running on http://localhost:${port}`);
-});
+const port = process.env.PORT || 3000;
+
+if (process.env.NODE_ENV !== 'production') {
+    server.listen(port, () => {
+        console.log(`Server running on http://localhost:${port}`);
+    });
+}
+
+export default app;
