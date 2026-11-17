@@ -4,7 +4,10 @@ import { useNavigate } from 'react-router'
 import { useState, useEffect } from 'react'
 import io from 'socket.io-client'
 
-const socket = io("https://chat-app-zvhd.vercel.app/")
+const socket = io("https://chat-app-zvhd.vercel.app", {
+  transports: ["websocket"],
+  withCredentials: true
+});
 
 const Dashboard = () => {
   const navigate = useNavigate();
