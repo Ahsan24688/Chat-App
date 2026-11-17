@@ -1,0 +1,67 @@
+import express from "express";
+import authrouter from "./src/auth/authrouter.js";
+import dotenv from "dotenv";
+import mongoose from "mongoose";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import http from "http";
+import {Server} from "socket.io";
+
+dotenv.config();
+
+const app = express();
+const port = 3000;
+
+const server = http.createServer(app);
+
+const io = new Server(server,{
+    cors: {
+        origin: "http://localhost:5173",
+        methods: ["GET", "POST"],
+        credentials: true
+    }
+})
+
+const corsOptions = {
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true,
+    // allowedHeaders: ["Content-Type", "Authorization"],
+};
+app.use(cors(corsOptions));
+app.use(express.json());
+app.use(cookieParser());
+
+
+
+
+app.get("/", (req, res) => {
+    res.send("Hello Server");
+});
+
+app.use("/auth", authrouter);
+
+io.on("connection", (Socket) => {
+    console.log(`sockit io connected, ${Socket.id}`);
+
+    Socket.on("Mesg send", (data) => {
+        console.log(data);
+        io.emit("New Mesg", data)
+    });
+
+    Socket.on("disconnect", () => {
+        console.log(`user disconnected, ${Socket.id}`);
+    })
+});
+
+
+
+mongoose.connect(process.env.MONGODB).then(() => {
+    console.log("Database connected");
+}).catch((error) => {
+    console.log(error.message);
+})
+
+server.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+});
