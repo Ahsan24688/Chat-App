@@ -15,7 +15,7 @@ const Login = () => {
   const onSubmit = async (data) => {
     console.log(data);
     try {
-      let response = await axios.post("https://chat-app-zvhd.vercel.app/auth/Login", {
+      let response = await axios.post("http://localhost:3000/auth/Login", {
         email: data.email,
         password: data.password,
       },

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router'
 import { useState, useEffect } from 'react'
 import io from 'socket.io-client'
 
-const socket = io("https://chat-app-zvhd.vercel.app", {
+const socket = io("http://localhost:3000", {
   transports: ["websocket"],
   withCredentials: true
 });
@@ -18,7 +18,7 @@ const Dashboard = () => {
   useEffect(() => {
     let fetchUserData = async () => {
       try {
-        let response = await axios.get("https://chat-app-zvhd.vercel.app/auth/dashboard", {
+        let response = await axios.get("http://localhost:3000/auth/dashboard", {
           withCredentials: true,
         });
 
@@ -46,7 +46,7 @@ const Dashboard = () => {
 
   let handlesession = async () => {
     try {
-      let response = await axios.post("https://chat-app-zvhd.vercel.app/auth/logout", {}, {
+      let response = await axios.post("http://localhost:3000/auth/logout", {}, {
         withCredentials: true,
       })
       if (response.status === 200) {
@@ -61,7 +61,7 @@ const Dashboard = () => {
   let handledelete = async () => {
     if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
       try {
-        let response = await axios.delete("https://chat-app-zvhd.vercel.app/auth/deleteuser", {
+        let response = await axios.delete("http://localhost:3000/auth/deleteuser", {
           withCredentials: true,
         })
         if (response.status === 200) {
@@ -79,12 +79,12 @@ const Dashboard = () => {
 
     if (chat.trim() !== "") {
       const Mesgdata = {
-        auther: user ? user.name : "Muhammad Ahsan", // Logged-in user ka naam
+        auther: user ? user.name : "Muhammad Ahsan",
         message: chat,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
 
-      // Server par "Mesg send" event emit karna hai
+      
       socket.emit("Mesg send", Mesgdata);
       setchat("");
     }
