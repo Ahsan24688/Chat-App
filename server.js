@@ -1,5 +1,5 @@
 import express from "express";
-import authrouter from "./src/auth/authrouter.js";
+import authrouter from "./authrouter.js";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -16,7 +16,8 @@ const server = http.createServer(app);
 
 const allowedOrigins = [
   "http://localhost:5173",
-  "https://react-chat-app-blond.vercel.app/"
+//   "https://react-chat-app-blond.vercel.app/",
+  "http://localhost:3000"
 ];
 
 const io = new Server(server,{

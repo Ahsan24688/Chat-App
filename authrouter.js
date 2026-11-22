@@ -1,9 +1,9 @@
 import express from "express";
 import joi from "joi";
-import ChatUser from "../../model.js";
+import ChatUser from "./model.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { authmiddlewear } from "../../authmiddlewear.js";
+import { authmiddlewear } from "./authmiddlewear.js";
 
 const router = express.Router();
 
