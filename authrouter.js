@@ -67,8 +67,8 @@ router.post("/register", async (req, res) => {
 
         res.cookie("token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
+            secure: true,
+            sameSite: "none",
             maxAge: 3600000
         });
 
@@ -130,8 +130,8 @@ router.post("/Login", async (req, res) => {
 
         res.cookie("token", token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
+            secure: true,
+            sameSite: "none",
             maxAge: 3600000
         });
 
@@ -176,8 +176,8 @@ router.post("/logout", authmiddlewear, async (req, res) => {
     try {
         res.clearCookie("token", {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
+            secure: true,
+            sameSite: "none",
             maxAge: 3600000
         });
 
@@ -213,8 +213,8 @@ router.delete("/deleteuser", authmiddlewear, async (req, res) => {
 
         res.clearCookie("token", {
             httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
+            secure: true,
+            sameSite: "none",
             maxAge: 3600000
         });
 
