@@ -15,7 +15,7 @@ const Register = () => {
     const onSubmit = async (data) => {
         console.log(data);
         try {
-            const response = await axios.post("http://localhost:3000/auth/register", {
+            const response = await axios.post("https://chat-app-production-36514a82.up.railway.app/auth/register", {
                 name: data.name,
                 email: data.email,
                 password: data.password,

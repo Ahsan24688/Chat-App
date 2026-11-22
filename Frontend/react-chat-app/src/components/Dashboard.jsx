@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router'
 import { useState, useEffect } from 'react'
 import io from 'socket.io-client'
 
-const socket = io("http://localhost:3000", {
+const socket = io("https://chat-app-production-36514a82.up.railway.app/", {
   transports: ["websocket"],
   withCredentials: true
 });
@@ -18,7 +18,7 @@ const Dashboard = () => {
   useEffect(() => {
     let fetchUserData = async () => {
       try {
-        let response = await axios.get("http://localhost:3000/auth/dashboard", {
+        let response = await axios.get("https://chat-app-production-36514a82.up.railway.app/auth/dashboard", {
           withCredentials: true,
         });
 
@@ -46,7 +46,7 @@ const Dashboard = () => {
 
   let handlesession = async () => {
     try {
-      let response = await axios.post("http://localhost:3000/auth/logout", {}, {
+      let response = await axios.post("https://chat-app-production-36514a82.up.railway.app/auth/logout", {}, {
         withCredentials: true,
       })
       if (response.status === 200) {
@@ -61,7 +61,7 @@ const Dashboard = () => {
   let handledelete = async () => {
     if (window.confirm("Are you sure you want to delete your account? This action cannot be undone.")) {
       try {
-        let response = await axios.delete("http://localhost:3000/auth/deleteuser", {
+        let response = await axios.delete("https://chat-app-production-36514a82.up.railway.app/auth/deleteuser", {
           withCredentials: true,
         })
         if (response.status === 200) {
