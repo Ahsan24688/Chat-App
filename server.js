@@ -5,10 +5,10 @@ import mongoose from "mongoose";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import http from "http";
-import {Server} from "socket.io";
+import { Server } from "socket.io";
 import model from "./model.js";
 
-const {userMesg} = model;
+const { userMesg } = model;
 
 
 dotenv.config();
@@ -19,12 +19,12 @@ const app = express();
 const server = http.createServer(app);
 
 const allowedOrigins = [
-  "http://localhost:5173",
-  "http://localhost:3000",
-  "https://react-chat-app-blond.vercel.app/"
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://react-chat-app-blond.vercel.app/"
 ];
 
-const io = new Server(server,{
+const io = new Server(server, {
     cors: {
         origin: allowedOrigins,
         methods: ["GET", "POST"],
@@ -33,18 +33,18 @@ const io = new Server(server,{
 })
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith(".vercel.app")) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
-  credentials: true,
+    origin: function (origin, callback) {
+
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith(".vercel.app")) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With"],
+    credentials: true,
 };
 app.use(cors(corsOptions));
 app.use(express.json());
@@ -62,11 +62,21 @@ app.use("/auth", authrouter);
 io.on("connection", (Socket) => {
     console.log(`sockit io connected, ${Socket.id}`);
 
+    Socket.on("Old Messages", async () => {
+        try {
+            const oldmesg = await userMesg.find().sort({ createdAt: 1 })
+            Socket.emit("Old Messages", oldmesg)
+        }
+        catch (error) {
+            console.log(error.message)
+        }
+    })
+
     Socket.on("Mesg send", async (data) => {
         console.log(data);
 
-        try{
-            const Messages = new userMesg ({
+        try {
+            const Messages = new userMesg({
                 auther: data.auther,
                 message: data.message,
                 time: data.time
@@ -76,7 +86,7 @@ io.on("connection", (Socket) => {
             io.emit("New Mesg", savedmesg)
 
         }
-        catch(error){
+        catch (error) {
             console.log("Error occur", error.message);
         }
 
@@ -99,9 +109,9 @@ mongoose.connect(process.env.MONGODB).then(() => {
 
 const port = process.env.PORT || 3000;
 
-    server.listen(port, () => {
-        console.log(`Server running on http://localhost:${port}`);
-    });
+server.listen(port, () => {
+    console.log(`Server running on http://localhost:${port}`);
+});
 
 
 export default app;
