@@ -8,7 +8,15 @@ const userSchema = new mongoose.Schema({
 },
     {timestamps: true}
 )
-
 const ChatUser = mongoose.model("Userchat", userSchema);
 
-export default ChatUser;
+const mesgSchema = new mongoose.Schema({
+    auther: {type: String, required: true},
+    message: {type: String, required: true},
+    time: {type: String, required: true}
+},
+    {timestamps: true}
+)
+const userMesg = mongoose.model("UserMesg", mesgSchema);
+
+export default  {ChatUser, userMesg};

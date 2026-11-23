@@ -6,6 +6,10 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import http from "http";
 import {Server} from "socket.io";
+import model from "./model.js";
+
+const {userMesg} = model;
+
 
 dotenv.config();
 
@@ -58,9 +62,25 @@ app.use("/auth", authrouter);
 io.on("connection", (Socket) => {
     console.log(`sockit io connected, ${Socket.id}`);
 
-    Socket.on("Mesg send", (data) => {
+    Socket.on("Mesg send", async (data) => {
         console.log(data);
-        io.emit("New Mesg", data)
+
+        try{
+            const Messages = new userMesg ({
+                auther: data.auther,
+                message: data.message,
+                time: data.time
+            })
+
+            const savedmesg = await Messages.save()
+            io.emit("New Mesg", savedmesg)
+
+        }
+        catch(error){
+            console.log("Error occur", error.message);
+        }
+
+
     });
 
     Socket.on("disconnect", () => {
