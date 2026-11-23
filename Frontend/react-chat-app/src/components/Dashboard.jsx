@@ -35,12 +35,20 @@ const Dashboard = () => {
   }, [navigate]);
 
   useEffect(() => {
+
+    socket.on("Old Messages", (oldmesg) => {
+      setchatlist(oldmesg);
+    })
+
     socket.on("New Mesg", (data) => {
       setchatlist((list) => [...list, data]);
     });
 
+    socket.emit("Old Messages");
+
     return () => {
       socket.off("New Mesg");
+      socket.off("Old Messages")
     };
   }, []);
 
