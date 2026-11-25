@@ -171,7 +171,7 @@ const Dashboard = () => {
       </nav>
 
 
-        <h2 className="text-xl font-bold mb-2">Chat App</h2>
+      <h2 className="text-xl font-bold mb-2">Chat App</h2>
       <div className="w-full mt-4 p-4 flex flex-col md:flex-row gap-4">
 
         <div className="w-full md:w-1/3 bg-white border border-amber-400 rounded-xl p-3">
@@ -200,8 +200,13 @@ const Dashboard = () => {
           {/* Chat messages list box */}
           {<div className="border border-amber-400 bg-white h-64 overflow-y-scroll p-3 rounded-lg mb-3">
             {chatlist.map((item, index) => {
+              let boxClass = "bg-gray-100 mr-auto";
+
+              if (user && String(item.senderId) === String(user._id)) {
+                boxClass = "bg-green-200 ml-auto";
+              }
               return (
-                <div key={index} className="mb-2 border-b pb-1">
+                <div key={index} className={`mb-2 p-2 rounded-lg max-w-xs ${boxClass}`}>
                   <span className="font-bold text-blue-600">{item.auther}: </span>
                   <span>{item.message}</span>
                   <span className="text-xs text-gray-400 ml-2">({item.time})</span>
