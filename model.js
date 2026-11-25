@@ -11,6 +11,16 @@ const userSchema = new mongoose.Schema({
 const ChatUser = mongoose.model("Userchat", userSchema);
 
 const mesgSchema = new mongoose.Schema({
+    senderId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ChatUser",
+        required: true
+    },
+    receiverId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "ChatUser",
+        required: true
+    },
     auther: {type: String, required: true},
     message: {type: String, required: true},
     time: {type: String, required: true}

@@ -62,29 +62,57 @@ app.use("/auth", authrouter);
 io.on("connection", (Socket) => {
     console.log(`sockit io connected, ${Socket.id}`);
 
-    Socket.on("Old Messages", async () => {
-        try {
-            const oldmesg = await userMesg.find().sort({ createdAt: 1 })
-            Socket.emit("Old Messages", oldmesg)
+    Socket.on("join", (userId) => {
+        if (userId) {
+            Socket.join(String(userId))
         }
-        catch (error) {
+    });
+
+    Socket.on("Private Messages", async ({ senderId, receiverId }) => {
+        try{
+            if( !senderId || !receiverId) return;
+
+            const Messages = await userMesg.find({
+                $or:[
+                    {senderId: senderId, receiverId: receiverId},
+                    {senderId: receiverId, receiverId: senderId}
+                ]
+            }).sort({ createdAt:1 })
+
+            Socket.emit("Private Messages", Messages)
+        }
+        catch(error){
             console.log(error.message)
         }
     })
+
+    // Socket.on("Old Messages", async () => {
+    //     try {
+    //         const oldmesg = await userMesg.find().sort({ createdAt: 1 })
+    //         Socket.emit("Old Messages", oldmesg)
+    //     }
+    //     catch (error) {
+    //         console.log(error.message)
+    //     }
+    // })
 
     Socket.on("Mesg send", async (data) => {
         console.log(data);
 
         try {
             const Messages = new userMesg({
+                senderId: data.senderId,
+                receiverId: data.receiverId,
                 auther: data.auther,
                 message: data.message,
                 time: data.time
             })
 
             const savedmesg = await Messages.save()
-            io.emit("New Mesg", savedmesg)
+            // io.emit("New Mesg", savedmesg)
 
+            io.to(String(data.receiverId)).emit("New Mesg", savedmesg);
+            io.to(String(data.senderId)).emit("New Mesg", savedmesg);
         }
         catch (error) {
             console.log("Error occur", error.message);

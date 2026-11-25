@@ -237,4 +237,28 @@ router.delete("/deleteuser", authmiddlewear, async (req, res) => {
 
 
 
+// for chat mesgs
+
+router.get("/users", authmiddlewear, async (req,res) => {
+    try{
+        const currentid = req.user.id;
+        const User = await ChatUser.find({_id: {$ne: currentid} }).select("-password");
+
+        return res.status(200).json({
+            message: "User Mesg chat fetch",
+            data: User,
+            code: 200
+        })
+    }
+    catch(error){
+        return res.status(500).json({
+            message: "Error in User Fetching",
+            data: null,
+            code: 500
+        })
+    }
+})
+
+
+
 export default router;
