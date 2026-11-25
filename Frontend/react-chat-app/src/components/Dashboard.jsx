@@ -14,6 +14,8 @@ const Dashboard = () => {
   const [user, setuser] = useState(null);
   const [chat, setchat] = useState("");
   const [chatlist, setchatlist] = useState([]);
+  const [userlist, setuserlist] = useState([])
+  const [selectuser, setselectuser] = useState(null)
 
   useEffect(() => {
     let fetchUserData = async () => {
@@ -25,6 +27,15 @@ const Dashboard = () => {
         if (response.status === 200) {
           setuser(response.data.data);
         }
+
+        let userchat = await axios.get("https://chat-app-production-36514a82.up.railway.app/auth/users", {
+          withCredentials: true,
+        })
+
+        if (userchat.status === 200) {
+          setuserlist(userchat.data.data)
+        }
+
       } catch (error) {
         console.log("Unauthorized or session expired", error);
         navigate("/login");
@@ -34,23 +45,67 @@ const Dashboard = () => {
     fetchUserData();
   }, [navigate]);
 
+  // useEffect(() => {
+
+  //   socket.on("Old Messages", (oldmesg) => {
+  //     setchatlist(oldmesg);
+  //   })
+
+  //   socket.on("New Mesg", (data) => {
+  //     setchatlist((list) => [...list, data]);
+  //   });
+
+  //   socket.emit("Old Messages");
+
+  //   return () => {
+  //     socket.off("New Mesg");
+  //     socket.off("Old Messages")
+  //   };
+  // }, []);
+
+
   useEffect(() => {
+    if (user && user._id) {
+      socket.emit("join", user._id);
+    }
+  }, [user]);
 
-    socket.on("Old Messages", (oldmesg) => {
-      setchatlist(oldmesg);
-    })
 
-    socket.on("New Mesg", (data) => {
-      setchatlist((list) => [...list, data]);
+  useEffect(() => {
+    if (!user || !selectuser) return;
+
+    setchatlist([]);
+    socket.emit("Private Messages", {
+      senderId: user._id,
+      receiverId: selectuser._id,
+    });
+  }, [user, selectuser]);
+
+
+  useEffect(() => {
+    socket.on("Private Messages", (messages) => {
+      setchatlist(messages);
     });
 
-    socket.emit("Old Messages");
+    socket.on("New Mesg", (data) => {
+      if (!user || !selectuser) return;
+
+      const isForCurrentChat =
+        (String(data.senderId) === String(user._id) &&
+          String(data.receiverId) === String(selectuser._id)) ||
+        (String(data.senderId) === String(selectuser._id) &&
+          String(data.receiverId) === String(user._id));
+
+      if (isForCurrentChat) {
+        setchatlist((list) => [...list, data]);
+      }
+    });
 
     return () => {
+      socket.off("Private Messages");
       socket.off("New Mesg");
-      socket.off("Old Messages")
     };
-  }, []);
+  }, [user, selectuser]);
 
   let handlesession = async () => {
     try {
@@ -85,14 +140,16 @@ const Dashboard = () => {
   const sendmessages = (e) => {
     e.preventDefault();
 
-    if (chat.trim() !== "") {
+    if (chat.trim() !== "" && user && selectuser) {
       const Mesgdata = {
+        senderId: user._id,
+        receiverId: selectuser._id,
         auther: user ? user.name : "Muhammad Ahsan",
         message: chat,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
 
-      
+
       socket.emit("Mesg send", Mesgdata);
       setchat("");
     }
@@ -113,32 +170,59 @@ const Dashboard = () => {
         </div>
       </nav>
 
-      <div className="w-full mt-4 p-4">
+
         <h2 className="text-xl font-bold mb-2">Chat App</h2>
-        
-        {/* Chat messages list box */}
-        <div className="border border-amber-400 bg-white h-64 overflow-y-scroll p-3 rounded-lg mb-3">
-          {chatlist.map((item, index) => {
-            return (
-              <div key={index} className="mb-2 border-b pb-1">
-                <span className="font-bold text-blue-600">{item.auther}: </span>
-                <span>{item.message}</span>
-                <span className="text-xs text-gray-400 ml-2">({item.time})</span>
-              </div>
-            );
-          })}
+      <div className="w-full mt-4 p-4 flex flex-col md:flex-row gap-4">
+
+        <div className="w-full md:w-1/3 bg-white border border-amber-400 rounded-xl p-3">
+          <h2 className="text-lg font-bold mb-2">Users</h2>
+          {userlist.map((item) => (
+            <div
+              key={item._id}
+              onClick={() => setselectuser(item)}
+              className={`p-2 mb-2 rounded-lg cursor-pointer border ${selectuser && selectuser._id === item._id
+                ? "bg-amber-300 font-bold"
+                : "bg-gray-50 hover:bg-amber-100"
+                }`}
+            >
+              <p>{item.name}</p>
+              <p className="text-xs text-gray-500">{item.email}</p>
+            </div>
+          ))}
         </div>
 
-        <form onSubmit={sendmessages} className="flex gap-2">
-          <input 
-            type='text' 
-            value={chat} 
-            onChange={(e) => setchat(e.target.value)}
-            placeholder="Type a message..."
-            className="border p-2 rounded-lg w-full bg-white"
-          />
-          <button type='submit' className="bg-blue-500 text-white px-4 py-2 rounded-lg">Send</button>
-        </form>
+        {/* Right Side: Chat Area */}
+        <div className="w-full md:w-2/3 bg-white border border-amber-400 rounded-xl p-3">
+          <h2 className="text-xl font-bold mb-2">
+            Chat with: {selectuser ? selectuser.name : "Select a user"}
+          </h2>
+
+          {/* Chat messages list box */}
+          {<div className="border border-amber-400 bg-white h-64 overflow-y-scroll p-3 rounded-lg mb-3">
+            {chatlist.map((item, index) => {
+              return (
+                <div key={index} className="mb-2 border-b pb-1">
+                  <span className="font-bold text-blue-600">{item.auther}: </span>
+                  <span>{item.message}</span>
+                  <span className="text-xs text-gray-400 ml-2">({item.time})</span>
+                </div>
+              );
+            })}
+          </div>}
+
+
+
+          <form onSubmit={sendmessages} className="flex gap-2">
+            <input
+              type='text'
+              value={chat}
+              onChange={(e) => setchat(e.target.value)}
+              placeholder="Type a message..."
+              className="border p-2 rounded-lg w-full bg-white"
+            />
+            <button type='submit' className="bg-blue-500 text-white px-4 py-2 rounded-lg">Send</button>
+          </form>
+        </div>
       </div>
     </div>
   )
